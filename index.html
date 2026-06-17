@@ -61,6 +61,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 2rem;display:
 .section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;line-height:1.15}
 .section-title em{font-style:italic;color:var(--gold)}
 
+
+
+/* CLIENTS */
+.clients{padding:6rem 2rem;background:var(--dark);border-top:1px solid rgba(201,169,110,0.08);border-bottom:1px solid rgba(201,169,110,0.08);overflow:hidden}
+.clients-sub{max-width:650px;margin:-2.5rem auto 3rem;text-align:center;font-size:0.9rem;line-height:1.7;color:rgba(250,250,248,0.5);font-weight:300}
+.logo-slider{max-width:1200px;margin:0 auto;overflow:hidden;position:relative;padding:1rem 0}
+.logo-slider::before,.logo-slider::after{content:'';position:absolute;top:0;width:120px;height:100%;z-index:2;pointer-events:none}
+.logo-slider::before{left:0;background:linear-gradient(to right,var(--dark),transparent)}
+.logo-slider::after{right:0;background:linear-gradient(to left,var(--dark),transparent)}
+.logo-track{display:flex;gap:1.5rem;width:max-content;animation:scrollLogos 28s linear infinite}
+.logo-card{width:170px;height:95px;background:var(--dark2);border:1px solid rgba(201,169,110,0.15);display:flex;align-items:center;justify-content:center;padding:1.2rem;border-radius:4px;transition:all 0.3s}
+.logo-card:hover{border-color:rgba(201,169,110,0.45);background:var(--dark3);transform:translateY(-3px)}
+.logo-card img{max-width:100%;max-height:62px;object-fit:contain;filter:grayscale(100%);opacity:0.75;transition:all 0.3s}
+.logo-card:hover img{filter:none;opacity:1}
+@keyframes scrollLogos{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.logo-slider:hover .logo-track{animation-play-state:paused}
+
 /* SERVICES */
 .services{padding:6rem 2rem;background:var(--dark)}
 .services-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:rgba(201,169,110,0.15)}
@@ -183,7 +200,10 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   .gallery-item:first-child{grid-column:span 2;grid-row:span 1}
   .contact-inner{grid-template-columns:1fr}
   .comparison{grid-template-columns:1fr}
+  .logo-card{width:140px;height:85px}
+  .clients-sub{margin-top:-2rem}
 }
+
 </style>
 </head>
 <body>
@@ -193,6 +213,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   <div class="logo">Kerlip <span>Photobooth</span></div>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
+    <li><a href="#clients">Clients</a></li>
     <li><a href="#packages">Packages</a></li>
     <li><a href="#gallery">Gallery</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -237,6 +258,43 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
     <div>
       <div class="stat-num" id="s4">0</div>
       <div class="stat-label">5-Star Reviews</div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- CLIENTS -->
+<section class="clients" id="clients">
+  <div class="section-header">
+    <div class="section-eyebrow">Trusted By</div>
+    <h2 class="section-title">Past Clients & <em>Event Partners</em></h2>
+  </div>
+  <p class="clients-sub">
+    Trusted by universities, hospitals, corporate teams, event organisers and private clients across Malaysia.
+  </p>
+
+  <div class="logo-slider">
+    <div class="logo-track">
+      <!-- Replace these image files with your real client logos inside the /images folder -->
+      <div class="logo-card"><img src="images/client-um.png" alt="Universiti Malaya"></div>
+      <div class="logo-card"><img src="images/client-ppum.png" alt="PPUM"></div>
+      <div class="logo-card"><img src="images/client-merdeka-centre.png" alt="Merdeka Centre"></div>
+      <div class="logo-card"><img src="images/client-uitm.png" alt="UiTM"></div>
+      <div class="logo-card"><img src="images/client-nottingham.png" alt="University of Nottingham Malaysia"></div>
+      <div class="logo-card"><img src="images/client-6.png" alt="Client Logo"></div>
+      <div class="logo-card"><img src="images/client-7.png" alt="Client Logo"></div>
+      <div class="logo-card"><img src="images/client-8.png" alt="Client Logo"></div>
+
+      <!-- Duplicate logos for smooth infinite scrolling -->
+      <div class="logo-card"><img src="images/client-um.png" alt="Universiti Malaya"></div>
+      <div class="logo-card"><img src="images/client-ppum.png" alt="PPUM"></div>
+      <div class="logo-card"><img src="images/client-merdeka-centre.png" alt="Merdeka Centre"></div>
+      <div class="logo-card"><img src="images/client-uitm.png" alt="UiTM"></div>
+      <div class="logo-card"><img src="images/client-nottingham.png" alt="University of Nottingham Malaysia"></div>
+      <div class="logo-card"><img src="images/client-6.png" alt="Client Logo"></div>
+      <div class="logo-card"><img src="images/client-7.png" alt="Client Logo"></div>
+      <div class="logo-card"><img src="images/client-8.png" alt="Client Logo"></div>
     </div>
   </div>
 </section>
@@ -565,6 +623,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   <div class="footer-tagline">Turning Moments Into Viral Memories · Malaysia</div>
   <ul class="footer-links">
     <li><a href="#services">Services</a></li>
+    <li><a href="#clients">Clients</a></li>
     <li><a href="#packages">Packages</a></li>
     <li><a href="#gallery">Gallery</a></li>
     <li><a href="#faq">FAQ</a></li>
@@ -585,25 +644,31 @@ function toggleFaq(el){
 }
 
 function submitForm(){
-  const fields = document.querySelectorAll('.contact-form input, .contact-form select, .contact-form textarea');
+  const form = document.querySelector('.contact-form');
+  const inputs = form.querySelectorAll('input, select, textarea');
 
-  const name = fields[0].value;
-  const date = fields[1].value;
-  const eventType = fields[2].value;
-  const venue = fields[3].value;
-  const guests = fields[4].value;
-  const notes = fields[5].value;
+  const name = inputs[0].value.trim();
+  const eventDate = inputs[1].value.trim();
+  const eventType = inputs[2].value.trim();
+  const venue = inputs[3].value.trim();
+  const guests = inputs[4].value.trim();
+  const notes = inputs[5].value.trim();
 
-  const message = `Hi Kerlip Photobooth, I would like to enquire about your photobooth service.
+  if(!name || !eventDate || !eventType || !venue){
+    alert('Please fill in your name, event date, event type and venue before sending your enquiry.');
+    return;
+  }
 
-Name: ${name}
-Event Date: ${date}
-Event Type: ${eventType}
-Venue: ${venue}
-Number of Guests: ${guests}
-Notes: ${notes}`;
+  const message = `Hi Kerlip Photobooth, I would like to enquire about your photobooth service.%0A%0A` +
+  `Name: ${name}%0A` +
+  `Event Date: ${eventDate}%0A` +
+  `Event Type: ${eventType}%0A` +
+  `Venue & City: ${venue}%0A` +
+  `Number of Guests: ${guests || '-'}%0A` +
+  `Additional Notes: ${notes || '-'}`;
 
-  const whatsappURL = `https://wa.me/60173987854?text=${encodeURIComponent(message)}`;
+  const whatsappNumber = '60173987854';
+  const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
   window.open(whatsappURL, '_blank');
 }
 
