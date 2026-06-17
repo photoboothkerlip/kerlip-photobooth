@@ -508,7 +508,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
       <div class="section-eyebrow">Let's Create Together</div>
       <h2>Book Your <em>Dream Experience</em></h2>
       <p>Tell us about your event and we'll craft the perfect photobooth experience. We typically respond within 2 hours during business hours.</p>
-      <a href="https://wa.me/60173987854" target="_blank" class="contact-link">
+      <a href="https:https://wa.me/60193987854" target="_blank" class="contact-link">
         <div class="contact-link-icon">💬</div>
         WhatsApp us directly
       </a>
@@ -518,7 +518,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
       </a>
       <a href="mailto:photoboothkerlip@gmail.com" class="contact-link">
         <div class="contact-link-icon">✉️</div>
-        photoboothkerlip@gmail.com
+        hello@kerlipphotobooth.com
       </a>
     </div>
     <div class="contact-form">
@@ -585,27 +585,7 @@ function toggleFaq(el){
 }
 
 function submitForm(){
-  const fields = document.querySelectorAll('.contact-form input, .contact-form select, .contact-form textarea');
-
-  const name = fields[0].value;
-  const date = fields[1].value;
-  const eventType = fields[2].value;
-  const venue = fields[3].value;
-  const guests = fields[4].value;
-  const notes = fields[5].value;
-
-  const message = `Hi Kerlip Photobooth, I would like to enquire about your photobooth service.
-
-Name: ${name}
-Event Date: ${date}
-Event Type: ${eventType}
-Venue: ${venue}
-Number of Guests: ${guests}
-Notes: ${notes}`;
-
-  const whatsappURL = `https://wa.me/60173987854?text=${encodeURIComponent(message)}`;
-  window.open(whatsappURL, '_blank');
-}
+  alert('Thank you! We\'ll WhatsApp you within 2 hours. 🎉');
 }
 
 // Animated counters
