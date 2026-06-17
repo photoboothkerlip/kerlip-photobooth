@@ -585,7 +585,27 @@ function toggleFaq(el){
 }
 
 function submitForm(){
-  alert('Thank you! We\'ll WhatsApp you within 2 hours. 🎉');
+  const fields = document.querySelectorAll('.contact-form input, .contact-form select, .contact-form textarea');
+
+  const name = fields[0].value;
+  const date = fields[1].value;
+  const eventType = fields[2].value;
+  const venue = fields[3].value;
+  const guests = fields[4].value;
+  const notes = fields[5].value;
+
+  const message = `Hi Kerlip Photobooth, I would like to enquire about your photobooth service.
+
+Name: ${name}
+Event Date: ${date}
+Event Type: ${eventType}
+Venue: ${venue}
+Number of Guests: ${guests}
+Notes: ${notes}`;
+
+  const whatsappURL = `https://wa.me/60173987854?text=${encodeURIComponent(message)}`;
+  window.open(whatsappURL, '_blank');
+}
 }
 
 // Animated counters
