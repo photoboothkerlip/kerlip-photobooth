@@ -71,9 +71,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 2rem;display:
 .logo-slider::before{left:0;background:linear-gradient(to right,var(--dark),transparent)}
 .logo-slider::after{right:0;background:linear-gradient(to left,var(--dark),transparent)}
 .logo-track{display:flex;gap:1.5rem;width:max-content;animation:scrollLogos 28s linear infinite}
-.logo-card{width:200px;height:110px;background:var(--dark2);border:1px solid rgba(201,169,110,0.15);display:flex;align-items:center;justify-content:center;padding:1.2rem;border-radius:4px;transition:all 0.3s}
+.logo-card{width:300px;height:180px;background:var(--dark2);border:1px solid rgba(201,169,110,0.15);display:flex;align-items:center;justify-content:center;padding:1.2rem;border-radius:4px;transition:all 0.3s}
 .logo-card:hover{border-color:rgba(201,169,110,0.45);background:var(--dark3);transform:translateY(-3px)}
-.logo-card img{max-width:100%;max-height:62px;object-fit:contain;filter:grayscale(100%);opacity:0.75;transition:all 0.3s}
+.logo-card img{max-width:100%;max-height:62px;object-fit:contain;filter:none;opacity:0.75;transition:all 0.3s}
 .logo-card:hover img{filter:none;opacity:1}
 @keyframes scrollLogos{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .logo-slider:hover .logo-track{animation-play-state:paused}
