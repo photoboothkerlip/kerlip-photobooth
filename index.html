@@ -84,12 +84,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 2rem;display:
 /* SERVICES */
 .services{padding:6rem 2rem;background:var(--dark)}
 .services-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:rgba(201,169,110,0.15)}
-.service-card{background:var(--dark2);padding:2.5rem 2rem;transition:all 0.4s;cursor:pointer;position:relative;overflow:hidden}
+.service-card{background:var(--dark2);padding:2.5rem 2rem;transition:background .4s,transform .4s;cursor:pointer;position:relative;overflow:hidden}
 .service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform 0.4s}
-.service-card:hover{background:var(--dark3)}
+.service-card:hover{background:var(--dark3);transform:translateY(-3px)}
 .service-card:hover::before{transform:scaleX(1)}
-.service-icon{width:44px;height:44px;border:1px solid rgba(201,169,110,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;font-size:1.2rem;transition:border-color 0.3s}
-.service-card:hover .service-icon{border-color:var(--gold)}
+.service-icon{width:52px;height:52px;border:1px solid rgba(201,169,110,.28);border-radius:14px;background:linear-gradient(145deg,rgba(201,169,110,.12),rgba(201,169,110,.025));color:var(--gold);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);transition:border-color .3s,background .3s,transform .3s,box-shadow .3s}
+.service-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.service-card:hover .service-icon{border-color:rgba(201,169,110,.72);background:linear-gradient(145deg,rgba(201,169,110,.2),rgba(201,169,110,.05));transform:translateY(-2px) rotate(-2deg);box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.06)}
 .service-card h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;margin-bottom:0.8rem;transition:color 0.3s}
 .service-card:hover h3{color:var(--gold)}
 .service-card p{font-size:0.85rem;color:rgba(250,250,248,0.5);line-height:1.7;font-weight:300}
@@ -340,37 +341,37 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   </div>
   <div class="services-grid">
     <div class="service-card">
-      <div class="service-icon">📸</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 5 13 3h-2L9.5 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="4"/><path d="M17.5 8.5h.01"/></svg></div>
       <h3>Classic Photobooth</h3>
       <p>Elegant open-air or enclosed booth with premium lighting, professional props, and instant printing — the timeless crowd favourite.</p>
       <div class="service-tag">Book This →</div>
     </div>
     <div class="service-card">
-      <div class="service-icon">🌀</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="17" rx="8" ry="3"/><path d="M12 14V5m0 0-3 3m3-3 3 3"/><path d="M5.5 11.5C4.55 12.15 4 13 4 14c0 1.65 1.65 3.1 4.15 3.95M18.5 11.5C19.45 12.15 20 13 20 14"/></svg></div>
       <h3>360 Spin Booth</h3>
       <p>The viral sensation. Cinematic slow-motion videos from every angle. The moment your guests live for — and share immediately.</p>
       <div class="service-tag">Book This →</div>
     </div>
     <div class="service-card">
-      <div class="service-icon">🎯</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 7h6l1.5 2H19a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z"/><circle cx="14" cy="14" r="3"/><path d="M3 5v6m0-6 2 2M3 5 1 7"/></svg></div>
       <h3>Roaming Booth</h3>
       <p>Our crew moves through your crowd capturing candid, electric energy. No lines, no waiting — just pure moment capture.</p>
       <div class="service-tag">Book This →</div>
     </div>
     <div class="service-card">
-      <div class="service-icon">🏢</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 21V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v15M2 21h20M8 8h4m-4 4h4m-4 4h4"/><path d="M16 10h2a2 2 0 0 1 2 2v9"/></svg></div>
       <h3>Corporate Activation</h3>
       <p>Branded experiences for product launches, company dinners & expos. Every photo becomes branded content that spreads organically.</p>
       <div class="service-tag">Book This →</div>
     </div>
     <div class="service-card">
-      <div class="service-icon">🎓</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Z"/><path d="M6 11.5V16c2.8 2.7 9.2 2.7 12 0v-4.5M22 9v6"/></svg></div>
       <h3>Convocation Booth</h3>
       <p>Celebrate milestones in style. Premium setups tailored for university convocations — memories that last a lifetime.</p>
       <div class="service-tag">Book This →</div>
     </div>
     <div class="service-card">
-      <div class="service-icon">💎</div>
+      <div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><path d="M10.2 10.2 20 20m-6-2 3-3m-5-1 3-3"/><path d="M5.9 5.9 4.5 4.5"/></svg></div>
       <h3>Premium Keychains</h3>
       <p>Luxurious photo keychains as event favours. A tangible, premium keepsake guests take home — your brand in their hands forever.</p>
       <div class="service-tag">Book This →</div>
