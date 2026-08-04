@@ -31,21 +31,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 2rem;display:
 .nav-cta:hover{background:var(--gold-light)}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--dark)}
-.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 60%,rgba(201,169,110,0.08) 0%,transparent 70%)}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,169,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,0.04) 1px,transparent 1px);background-size:80px 80px;opacity:0.5}
-.hero-content{text-align:center;position:relative;z-index:2;max-width:900px;padding:2rem}
-.hero-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:0.8rem}
-.hero-eyebrow::before,.hero-eyebrow::after{content:'';flex:1;max-width:60px;height:1px;background:var(--gold);opacity:0.5}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,7vw,6.5rem);font-weight:900;line-height:1.05;margin-bottom:1.5rem;letter-spacing:-0.02em}
-.hero h1 em{font-style:italic;color:var(--gold)}
-.hero-sub{font-size:1.05rem;color:rgba(250,250,248,0.6);max-width:520px;margin:0 auto 2.5rem;line-height:1.7;font-weight:300}
-.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.hero{min-height:100svh;display:flex;align-items:center;position:relative;overflow:hidden;background:var(--dark)}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;z-index:0}
+.hero-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(6,6,6,.92) 0%,rgba(6,6,6,.74) 36%,rgba(6,6,6,.25) 68%,rgba(6,6,6,.16) 100%),linear-gradient(0deg,rgba(6,6,6,.65) 0%,transparent 42%,rgba(6,6,6,.3) 100%)}
+.hero-content{position:relative;z-index:2;width:min(1200px,100%);margin:0 auto;padding:9rem 2rem 7rem;text-align:left}
+.hero-copy{max-width:650px}
+.hero-eyebrow{font-size:0.72rem;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold-light);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.8rem}
+.hero-eyebrow::before{content:'';width:48px;height:1px;background:var(--gold);opacity:0.8}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(3.2rem,6vw,6rem);font-weight:700;line-height:1.02;margin-bottom:1.5rem;letter-spacing:-0.025em;text-wrap:balance;text-shadow:0 3px 30px rgba(0,0,0,.28)}
+.hero h1 em{font-style:italic;color:var(--gold-light)}
+.hero-sub{font-size:1.05rem;color:rgba(250,250,248,0.78);max-width:560px;margin:0 0 2.5rem;line-height:1.7;font-weight:300;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.hero-btns{display:flex;gap:1rem;justify-content:flex-start;flex-wrap:wrap}
 .btn-primary{background:var(--gold);color:var(--dark);padding:0.9rem 2.2rem;font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all 0.3s}
 .btn-primary:hover{background:var(--gold-light);transform:translateY(-2px)}
 .btn-outline{border:1px solid rgba(201,169,110,0.5);color:var(--gold);padding:0.9rem 2.2rem;font-size:0.85rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all 0.3s}
 .btn-outline:hover{border-color:var(--gold);background:rgba(201,169,110,0.08)}
 .hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(250,250,248,0.3);font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase}
+.video-toggle{position:absolute;right:2rem;bottom:2rem;z-index:3;width:46px;height:46px;border-radius:50%;border:1px solid rgba(250,250,248,.5);background:rgba(10,10,10,.4);backdrop-filter:blur(12px);color:var(--white);display:grid;place-items:center;cursor:pointer;font-size:1rem;transition:background .3s,border-color .3s,transform .3s}
+.video-toggle:hover{background:rgba(10,10,10,.7);border-color:var(--gold);transform:scale(1.05)}
 .scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollPulse 2s ease-in-out infinite}
 @keyframes scrollPulse{0%,100%{opacity:0.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
 
@@ -192,6 +195,17 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
 
 @media(max-width:768px){
   .nav-links{display:none}
+  .hero{min-height:92svh;align-items:flex-end}
+  .hero-video{object-position:62% center}
+  .hero-overlay{background:linear-gradient(0deg,rgba(6,6,6,.96) 0%,rgba(6,6,6,.66) 54%,rgba(6,6,6,.25) 100%)}
+  .hero-content{padding:8rem 1.35rem 6.5rem}
+  .hero-copy{max-width:560px}
+  .hero h1{font-size:clamp(2.8rem,14vw,4.3rem)}
+  .hero-sub{font-size:.96rem;max-width:34rem}
+  .hero-btns{gap:.75rem}
+  .btn-primary,.btn-outline{padding:.85rem 1.25rem;font-size:.72rem}
+  .hero-scroll{display:none}
+  .video-toggle{right:1.25rem;bottom:1.25rem}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .services-grid{grid-template-columns:1fr}
   .packages-grid{grid-template-columns:1fr}
@@ -202,6 +216,12 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   .comparison{grid-template-columns:1fr}
   .logo-card{width:140px;height:85px}
   .clients-sub{margin-top:-2rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .hero-video{display:none}
+  .scroll-line,.logo-track{animation:none}
 }
 
 </style>
@@ -223,21 +243,26 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
+  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="hero-wedding-poster.jpg" aria-label="Newlywed couple enjoying the Kerlip Photobooth experience">
+    <source src="hero-wedding.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow">Premium Photobooth Malaysia</div>
-    <h1>Turning Moments Into<br><em>Viral Memories</em></h1>
-    <p class="hero-sub">Luxury photobooth experiences for weddings, corporate events & celebrations across Malaysia. Your guests will never forget it.</p>
-    <div class="hero-btns">
-      <a href="#contact" class="btn-primary">Book Your Experience</a>
-      <a href="#packages" class="btn-outline">View Packages</a>
+    <div class="hero-copy">
+      <div class="hero-eyebrow">Premium Photobooth Malaysia</div>
+      <h1>Every Love Story<br>Deserves to <em>Shine</em></h1>
+      <p class="hero-sub">A refined photobooth experience with beautiful lighting, instant keepsakes and memories your guests will treasure.</p>
+      <div class="hero-btns">
+        <a href="#contact" class="btn-primary">Book Your Experience</a>
+        <a href="#gallery" class="btn-outline">Explore Our Work</a>
+      </div>
     </div>
   </div>
   <div class="hero-scroll">
     <div class="scroll-line"></div>
     Scroll
   </div>
+  <button class="video-toggle" id="videoToggle" type="button" aria-label="Pause background video" aria-pressed="false">Ⅱ</button>
 </section>
 
 <!-- STATS -->
@@ -664,6 +689,24 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
 <a href="https://wa.me/60173987854" target="_blank" class="wa-float" title="Chat on WhatsApp">💬</a>
 
 <script>
+const heroVideo=document.getElementById('heroVideo');
+const videoToggle=document.getElementById('videoToggle');
+if(heroVideo&&videoToggle){
+  videoToggle.addEventListener('click',()=>{
+    if(heroVideo.paused){
+      heroVideo.play();
+      videoToggle.textContent='Ⅱ';
+      videoToggle.setAttribute('aria-label','Pause background video');
+      videoToggle.setAttribute('aria-pressed','false');
+    }else{
+      heroVideo.pause();
+      videoToggle.textContent='▶';
+      videoToggle.setAttribute('aria-label','Play background video');
+      videoToggle.setAttribute('aria-pressed','true');
+    }
+  });
+}
+
 function toggleFaq(el){
   const item=el.parentElement;
   const wasOpen=item.classList.contains('open');
