@@ -149,11 +149,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 2rem;display:
 /* GALLERY */
 .gallery{padding:6rem 2rem;background:var(--dark)}
 .gallery-inner{max-width:1200px;margin:0 auto}
-.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto;gap:1px;background:rgba(201,169,110,0.15);margin-top:3rem}
-.gallery-item{overflow:hidden;aspect-ratio:1;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;cursor:pointer}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto;gap:12px;background:transparent;margin-top:3rem}
+.gallery-item{overflow:hidden;aspect-ratio:1;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;cursor:pointer;border:1px solid rgba(201,169,110,.16);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.22)}
 .gallery-item:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 .gallery-overlay{position:absolute;inset:0;background:rgba(201,169,110,0.08);opacity:0;transition:opacity 0.3s;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)}
 .gallery-item:hover .gallery-overlay{opacity:1}
+.keychain-showcase{grid-column:span 2;aspect-ratio:1/1;border-color:rgba(201,169,110,.22);background:#111;cursor:default}
+.keychain-media{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr;gap:2px;background:rgba(201,169,110,.18)}
+.keychain-media video,.keychain-photo-frame img{width:100%;height:100%;display:block;object-fit:cover;min-width:0;min-height:0}
+.keychain-media video{object-position:center}
+.keychain-photo-frame{grid-column:1 / span 2;position:relative;overflow:hidden;background:#e9e0d2;min-width:0;min-height:0}
+.keychain-photo-frame img{object-fit:contain;object-position:center;transform:scale(1.35)}
+.keychain-showcase::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(6,6,6,.9) 100%);pointer-events:none}
+.keychain-film-badge{position:absolute;z-index:2;top:1rem;left:1rem;padding:.45rem .7rem;border:1px solid rgba(250,250,248,.16);border-radius:999px;background:rgba(7,7,7,.52);backdrop-filter:blur(10px);color:rgba(250,250,248,.88);font-size:.62rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase}
+.keychain-film-badge::before{content:'';display:inline-block;width:6px;height:6px;margin-right:.45rem;border-radius:50%;background:var(--gold);vertical-align:1px}
+.keychain-caption{position:absolute;z-index:2;right:1.25rem;bottom:1.1rem;left:1.25rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;text-align:left}
+.keychain-caption strong{display:block;font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--white)}
+.keychain-caption span{display:block;margin-top:.2rem;color:rgba(250,250,248,.58);font-size:.72rem;letter-spacing:.08em}
+.keychain-caption-mark{color:var(--gold);font-size:1.2rem}
 
 /* FAQ */
 .faq{padding:6rem 2rem;background:var(--dark2)}
@@ -216,6 +229,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
   .testi-grid{grid-template-columns:1fr}
   .gallery-grid{grid-template-columns:repeat(2,1fr)}
   .gallery-item:first-child{grid-column:span 2;grid-row:span 1}
+  .keychain-showcase{grid-column:span 2;aspect-ratio:1/1}
   .contact-inner{grid-template-columns:1fr}
   .comparison{grid-template-columns:1fr}
   .logo-card{width:140px;height:85px}
@@ -557,12 +571,22 @@ footer{background:var(--dark2);border-top:1px solid rgba(201,169,110,0.1);paddin
         <div class="gallery-overlay">Hospital Event </div>
       </div>
 
-      <!-- Replace the Keychains item with this -->
-<div class="gallery-item" style="grid-column: span 2;">
-  <img src="F37639FB-9E21-4B77-BC9B-C38E70573DC6.png"
-       alt="Premium Keychains"
-       style="width:100%;height:100%;object-fit:cover;display:block">
-  <div class="gallery-overlay">Premium Keychains</div>
+      <!-- Featured keychain film and product detail -->
+<div class="gallery-item keychain-showcase">
+  <div class="keychain-media">
+    <video autoplay muted loop playsinline preload="metadata" poster="F37639FB-9E21-4B77-BC9B-C38E70573DC6.png" aria-label="Premium keychain product film">
+      <source src="keychain-video.mp4" type="video/mp4">
+    </video>
+    <video autoplay muted loop playsinline preload="metadata" poster="F37639FB-9E21-4B77-BC9B-C38E70573DC6.png" aria-label="Premium keychain detail film">
+      <source src="keychain-video-2.mp4" type="video/mp4">
+    </video>
+    <div class="keychain-photo-frame"><img src="F37639FB-9E21-4B77-BC9B-C38E70573DC6.png" alt="Finished premium photo keychains"></div>
+  </div>
+  <div class="keychain-film-badge">Featured Film · 3 Sec Loop</div>
+  <div class="keychain-caption">
+    <div><strong>Premium Keychains</strong><span>Hand-finished keepsakes for every guest</span></div>
+    <div class="keychain-caption-mark" aria-hidden="true">↻</div>
+  </div>
 </div>
 
 <!-- New Photo -->
