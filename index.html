@@ -991,7 +991,7 @@ function themeButtonHtml(){
 function sampleBooking(){
   return { id:uid(), bookingDate:todayISO(), jenisEvent:'Hospital Appreciation Event', namaClient:'Ms Tina',
     noHpClient:'+447917 414593', tarikhEvent:'2026-07-05', lokasiEvent:'Universiti Malaya Medical Centre (UMMC)',
-    namaCP:'', noHpCP:'', packageType:'PHOTOBOOTH', pakej:'PHOTOBOOTH 3 HOURS', packageHours:'3', backdrop:'', pakejTambahan:'N/A', waktuEvent:'',
+    namaCP:'', noHpCP:'', packageType:'PHOTOBOOTH', pakej:'PHOTOBOOTH 3 HOURS', packageHours:'3', photoboothSets:1, backdrop:'', pakejTambahan:'N/A', waktuEvent:'',
     transportCharges:0, jumlahKeseluruhan:1150, bayaranDeposit:0, paymentStatus:'Paid', bookingStatus:'Confirmed',
     calendarSynced:false, quotationRef:'', revenueCategory:'Other income', createdAt:new Date().toISOString() };
 }
@@ -999,7 +999,7 @@ function emptyBooking(){
   const bookingDate = todayISO();
   const bookingId = createBookingId(bookingDate);
   return { id:uid(), bookingId, bookingDate, jenisEvent:'', buyerCompany:'', namaClient:'', noHpClient:'', tarikhEvent:'', lokasiEvent:'',
-    namaCP:'', noHpCP:'', packageType:'PHOTOBOOTH', pakej:'PHOTOBOOTH 2 HOURS', packageHours:'2', backdrop:'', pakejTambahan:'N/A', waktuEvent:'', transportCharges:0,
+    namaCP:'', noHpCP:'', packageType:'PHOTOBOOTH', pakej:'PHOTOBOOTH 2 HOURS', packageHours:'2', photoboothSets:1, backdrop:'', pakejTambahan:'N/A', waktuEvent:'', transportCharges:0,
     jumlahKeseluruhan:0, bayaranDeposit:0, paymentStatus:'Unpaid', bookingStatus:'Pending', calendarSynced:false,
     quotationRef:'', revenueCategory:'Other income', createdAt:new Date().toISOString() };
 }
@@ -1082,6 +1082,7 @@ function getAutoPackageBenefits(obj={}){
   const eventType = normaliseEventType(obj.jenisEvent || obj.eventType || '');
   const packageType = String(obj.packageType || obj.pakej || '').toUpperCase();
   const hours = detectPackageHours(obj);
+  const photoboothSets = Math.max(1, Math.floor(num(obj.photoboothSets) || 1));
   const benefits = [];
 
   const isPurePhotobooth = packageType.includes('PHOTOBOOTH') && !packageType.includes('360') && !packageType.includes('COMBO');
@@ -1091,8 +1092,9 @@ function getAutoPackageBenefits(obj={}){
     return benefits;
   }
 
-  // Photobooth only: 4 hours and above receive free 100pcs keychain.
-  benefits.push({ key:'keychain100', label:'FREE 100 PCS KEYCHAIN' });
+  // Photobooth only: 4 hours and above receive 100pcs keychain per requested set.
+  const keychainQty = 100 * photoboothSets;
+  benefits.push({ key:'keychain', quantity:keychainQty, label:`FREE ${keychainQty} PCS KEYCHAIN` });
 
   // Wedding photobooth only: 4 hours and above receive free guest book.
   // Company photobooth booking does not receive free guest book.
@@ -1154,6 +1156,7 @@ function ensurePackageDefaults(obj={}){
   obj.packageHours = String(obj.packageHours || detectPackageHours(obj) || hours[0] || '2');
   if(!hours.includes(String(obj.packageHours))) obj.packageHours = hours[0] || '2';
   obj.pakej = buildPackageName(obj.packageType, obj.packageHours);
+  obj.photoboothSets = Math.max(1, Math.floor(num(obj.photoboothSets) || 1));
   return obj;
 }
 function buildPackageName(type,hours){
@@ -1169,7 +1172,7 @@ const BOOKING_FIELDS = [
   ['namaClient','Nama Client','text'],['noHpClient','No HP Client','text'],
   ['tarikhEvent','Tarikh Event','date'],['lokasiEvent','Lokasi Event','text'],
   ['namaCP','Nama Contact Person Waktu Event','text'],['noHpCP','No HP Contact Person','text'],
-  ['packageType','Pilihan Pakej','select',PACKAGE_TYPE_OPTIONS],['packageHours','Package Duration (Hours)','selectDynamicPackageHours'],['pakej','Package Name (Auto)','readonly'],['backdrop','Pilihan Backdrop','text'],
+  ['packageType','Pilihan Pakej','select',PACKAGE_TYPE_OPTIONS],['packageHours','Package Duration (Hours)','selectDynamicPackageHours'],['photoboothSets','Number of Photobooth Sets','number'],['pakej','Package Name (Auto)','readonly'],['backdrop','Pilihan Backdrop','text'],
   ['pakejTambahan','Pakej Tambahan','text'],['waktuEvent','Waktu Event','text'],
   ['transportCharges','Transportation Charges (RM)','number'],
   ['jumlahKeseluruhan','Jumlah Keseluruhan (RM)','number'],['bayaranDeposit','Bayaran Deposit (RM)','number'],
@@ -1703,7 +1706,7 @@ function buildBookingSummaryPDF(b){
   doc.autoTable({ startY:y, theme:'grid', headStyles:{fillColor:[28,24,21],textColor:[239,228,196],fontSize:9},
     styles:{fontSize:9,cellPadding:3}, margin:{left:16,right:16},
     head:[['Item','Detail']],
-    body:[['Package', b.pakej||'—'],['Backdrop', b.backdrop||'—'],['Add-On', b.pakejTambahan||'N/A'],
+    body:[['Package', b.pakej||'—'],['Photobooth Sets', Math.max(1, Math.floor(num(b.photoboothSets)||1))],['Included Free Items', packageBenefitLabels(b).join(', ')||'None'],['Backdrop', b.backdrop||'—'],['Add-On', b.pakejTambahan||'N/A'],
       ['Transportation Charges', rm(b.transportCharges)]],
   });
   y = doc.lastAutoTable.finalY + 8;
@@ -2590,7 +2593,7 @@ function renderBookings(){
               <td style="font-weight:600" title="${esc(b.namaClient)}">${esc(b.namaClient)}</td>
               <td title="${esc(b.noHpClient)}">${esc(b.noHpClient)}</td>
               <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis" title="${esc(b.lokasiEvent)}">${esc(b.lokasiEvent)}</td>
-              <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis" title="${esc(b.pakej)}">${esc(b.pakej)}</td>
+              <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis" title="${esc(b.pakej)} — ${Math.max(1,Math.floor(num(b.photoboothSets)||1))} set(s)">${esc(b.pakej)} · ${Math.max(1,Math.floor(num(b.photoboothSets)||1))} set(s)</td>
               <td>${rm(b.jumlahKeseluruhan)}</td>
               <td style="color:${bal>0?'var(--danger)':'var(--success)'};font-weight:700">${rm(bal)}</td>
               <td>${badge(paymentTone(b.paymentStatus),b.paymentStatus)}</td>
@@ -3102,7 +3105,7 @@ function renderFormModal(){
 
   if(type==='booking' || type==='quotation'){
     const benefitText = packageBenefitLabels(data);
-    extra += `<div class="field" style="grid-column:1/-1"><span class="label">Auto Free Items</span><div class="input" style="height:auto;min-height:44px;background:var(--surface);font-weight:700;line-height:1.55">${benefitText.length ? benefitText.map(esc).join('<br>') : 'NO AUTO FREE ITEM FOR THIS PACKAGE'}</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Rule: 360 Spinbooth / Combo = no auto free item. Photobooth 4 hours and above = free 100pcs keychain. Wedding photobooth 4 hours and above = free guest book + keychain. Company photobooth = keychain only.</div></div>`;
+    extra += `<div class="field" style="grid-column:1/-1"><span class="label">Auto Free Items</span><div class="input" id="auto-free-items" style="height:auto;min-height:44px;background:var(--surface);font-weight:700;line-height:1.55">${benefitText.length ? benefitText.map(esc).join('<br>') : 'NO AUTO FREE ITEM FOR THIS PACKAGE'}</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Rule: 360 Spinbooth / Combo = no auto free item. Photobooth bookings of 4 hours and above receive 100pcs keychain per photobooth set (for example, 2 sets = 200pcs). Wedding photobooth also receives a free guest book. Company photobooth receives keychains only.</div></div>`;
   }
 
   return `<div class="modal-bg" id="modal-bg">
@@ -3122,7 +3125,7 @@ function renderFormModal(){
               ? `<div class="field"><span class="label">${label}</span><input class="input" type="text" id="ff-${key}" data-key="${key}" value="${esc(data[key] || buildPackageName(data.packageType,data.packageHours))}" readonly style="background:var(--surface);font-weight:700" /></div>`
             : t==='selectDynamic'
               ? `<div class="field"><span class="label">${label}</span><select class="input" id="ff-${key}" data-key="${key}"><option value="">Select staff from Staff Information</option>${staffInfoOptions().map(o=>`<option value="${esc(o.name)}" data-staff-id="${esc(o.id)}" ${String(data[key]||'').toLowerCase()===String(o.name||'').toLowerCase()?'selected':''}>${esc(o.name)}</option>`).join('')}</select><div style="font-size:11px;color:var(--muted);margin-top:4px">This dropdown is linked to Staff Information. Phone, IC, Bank Name and Account Number will auto-fill.</div></div>`
-              : `<div class="field" ${key==='buyerCompany'?`id="field-buyerCompany" style="display:${String(data.jenisEvent||'').toUpperCase()==='COMPANY'?'flex':'none'}"`:''}><span class="label">${label}</span><input class="input" type="${t}" id="ff-${key}" data-key="${key}" value="${esc(data[key])}" ${t==='number'?'step="0.01"':''} ${type==='staff' && ['staffPhone','staffIC','staffBankName','staffBankNo'].includes(key)?'readonly title="Auto-filled from Staff Information" style="background:var(--surface);font-weight:700"':''} /></div>`
+              : `<div class="field" ${key==='buyerCompany'?`id="field-buyerCompany" style="display:${String(data.jenisEvent||'').toUpperCase()==='COMPANY'?'flex':'none'}"`:''}><span class="label">${label}</span><input class="input" type="${t}" id="ff-${key}" data-key="${key}" value="${esc(data[key])}" ${t==='number'?(key==='photoboothSets'?'step="1" min="1"':'step="0.01"'):''} ${type==='staff' && ['staffPhone','staffIC','staffBankName','staffBankNo'].includes(key)?'readonly title="Auto-filled from Staff Information" style="background:var(--surface);font-weight:700"':''} /></div>`
           ).join('')}
           ${extra}
         </div>
@@ -3280,16 +3283,26 @@ function attachGlobalEvents(){
   const packageTypeSelect = $('ff-packageType');
   const packageHoursSelect = $('ff-packageHours');
   const packageNameInput = $('ff-pakej');
+  const photoboothSetsInput = $('ff-photoboothSets');
+  const autoFreeItems = $('auto-free-items');
   if(packageTypeSelect && packageHoursSelect && packageNameInput && State.formModal && (State.formModal.type === 'booking' || State.formModal.type === 'quotation')){
+    const refreshBenefits = () => {
+      if(!autoFreeItems) return;
+      const preview = {...State.formModal.data, packageType:packageTypeSelect.value, packageHours:packageHoursSelect.value, photoboothSets:photoboothSetsInput ? photoboothSetsInput.value : 1};
+      const labels = packageBenefitLabels(preview);
+      autoFreeItems.innerHTML = labels.length ? labels.map(esc).join('<br>') : 'NO AUTO FREE ITEM FOR THIS PACKAGE';
+    };
     const refreshPackageName = () => {
       const validHours = packageHoursOptionsFor(packageTypeSelect.value);
       const currentHour = packageHoursSelect.value;
       packageHoursSelect.innerHTML = validHours.map(h=>`<option value="${esc(h)}" ${String(h)===String(currentHour)?'selected':''}>${esc(h)} HOURS</option>`).join('');
       if(!validHours.includes(packageHoursSelect.value)) packageHoursSelect.value = validHours[0] || '';
       packageNameInput.value = buildPackageName(packageTypeSelect.value, packageHoursSelect.value);
+      refreshBenefits();
     };
     packageTypeSelect.onchange = refreshPackageName;
     packageHoursSelect.onchange = refreshPackageName;
+    if(photoboothSetsInput) photoboothSetsInput.oninput = refreshBenefits;
     refreshPackageName();
   }
 
@@ -3441,6 +3454,7 @@ function submitForm(e){
 
   if(type==='booking'){
     ensurePackageDefaults(out);
+    if(!Number.isInteger(out.photoboothSets) || out.photoboothSets < 1){ showFormWarn('Number of Photobooth Sets must be a whole number of at least 1.'); return; }
     out.revenueCategory = canonicalRevenueCategory(out.revenueCategory, out);
     out.paymentStatus = $('ff-paymentStatus').value; out.bookingStatus = $('ff-bookingStatus').value;
     if(out.paymentStatus === 'Paid') out.bayaranDeposit = num(out.jumlahKeseluruhan);
@@ -3700,7 +3714,7 @@ function exportBookingsExcel(){
   const rows = State.bookings.map(b => ({
     'Booking ID': getBookingId(b), 'Booking Date': b.bookingDate, 'Jenis Event': b.jenisEvent, 'Company Name': b.buyerCompany||'', 'Nama Client': b.namaClient, 'No HP Client': b.noHpClient,
     'Tarikh Event': b.tarikhEvent, 'Lokasi Event': b.lokasiEvent, 'Nama CP': b.namaCP, 'No HP CP': b.noHpCP,
-    'Pakej': b.pakej, 'Backdrop': b.backdrop, 'Pakej Tambahan': b.pakejTambahan, 'Waktu Event': b.waktuEvent,
+    'Pakej': b.pakej, 'Photobooth Sets': Math.max(1, Math.floor(num(b.photoboothSets)||1)), 'Free Items': packageBenefitLabels(b).join(', '), 'Backdrop': b.backdrop, 'Pakej Tambahan': b.pakejTambahan, 'Waktu Event': b.waktuEvent,
     'Transport (RM)': b.transportCharges, 'Jumlah (RM)': b.jumlahKeseluruhan, 'Deposit (RM)': b.bayaranDeposit,
     'Balance (RM)': bookingBalance(b), 'Payment Status': b.paymentStatus,
     'Booking Status': b.bookingStatus, 'GCal Synced': b.calendarSynced?'Yes':'No',
