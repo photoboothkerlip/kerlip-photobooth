@@ -41,7 +41,7 @@ if (!get("SELECT value FROM settings WHERE name='demo'")) {
   const demo=addEvent('Annual Dinner','2026-11-14','What made tonight memorable?','2468');
   let sample=null;
   try {
-    const bytes=readFileSync(new URL('./public/demo.jpg',import.meta.url));
+    const bytes=Buffer.from(readFileSync(new URL('./public/demo.jpg.b64',import.meta.url),'utf8'),'base64');
     sample=token();
     run('INSERT INTO photos VALUES (?,?,?,?,1)',sample,demo.id,'image/jpeg',bytes);
     run('UPDATE events SET cover=? WHERE id=?',sample,demo.id);
