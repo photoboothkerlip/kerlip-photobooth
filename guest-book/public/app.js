@@ -217,7 +217,17 @@ async function album(id){
     catch(error){showError(error);}
     finally{download.disabled=false;}
   },'primary');
-  const head=append(element('div','','bar'),append(element('div'),element('h1',event.name),element('p','Private organiser album � '+dateLabel(event.date),'muted')),download);
+  const play=button('Play slideshow',async()=>{
+    try{openSlideshow(await api(root),id,play);}
+    catch(error){showError(error);}
+  },'primary');
+  const video=button('Download highlight video',async()=>{
+    video.disabled=true;notice.className='';
+    try{await exportHighlight(await api(root),id);}
+    catch(error){showError(error);}
+    finally{video.disabled=false;}
+  });
+  const head=append(element('div','','bar'),append(element('div'),element('h1',event.name),element('p','Private organiser album � '+dateLabel(event.date),'muted')),append(element('div','','actions album-actions'),play,video,download));
   const gallery=element('section','','cards');
   function renderCards(entries){
   gallery.replaceChildren();
@@ -243,6 +253,124 @@ async function album(id){
     }
   },4000);
 }
+function openSlideshow(event,id,trigger){
+  const dialog=element('dialog','','album-show');
+  dialog.setAttribute('aria-label','Guest book slideshow');
+  const stage=element('div','','show-stage');
+  const slides=[null,...event.entries];
+  let index=0,timer,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,startX;
+  const toggle=button('Pause',()=>{
+    if(index===slides.length-1 && !playing)index=0;
+    playing=!playing;render();
+  });
+  const previous=button('Previous',()=>move(-1));
+  const next=button('Next',()=>move(1));
+  function move(delta){
+    index=Math.max(0,Math.min(index+delta,slides.length-1));
+    render();
+  }
+  function render(){
+    clearTimeout(timer);
+    const entry=slides[index];
+    const card=element('article','','show-frame');
+    const photo=entry?entry.photo:event.cover;
+    if(photo)card.append(image(photoUrl('album',id,photo),''));
+    const caption=element('div','','show-caption');
+    if(entry)caption.append(element('p',entry.message),element('strong',entry.name));
+    else caption.append(element('h2',event.name),element('p',dateLabel(event.date)));
+    card.append(caption);stage.replaceChildren(card);stage.scrollTop=0;
+    previous.disabled=index===0;next.disabled=index===slides.length-1;
+    if(next.disabled)playing=false;
+    toggle.disabled=slides.length===1;
+    toggle.textContent=playing?'Pause':next.disabled?'Replay':'Play';
+    if(playing)timer=setTimeout(()=>move(1),entry?Math.max(4800,entry.message.length*48):2800);
+  }
+  stage.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;},{passive:true});
+  stage.addEventListener('touchend',e=>{
+    const distance=e.changedTouches[0].clientX-startX;
+    if(Math.abs(distance)>60)move(distance<0?1:-1);
+  },{passive:true});
+  dialog.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft')move(-1);
+    if(e.key==='ArrowRight')move(1);
+  });
+  dialog.addEventListener('close',()=>{clearTimeout(timer);dialog.remove();trigger.focus();});
+  dialog.append(stage,append(element('div','','show-controls'),previous,toggle,next,button('Close',()=>dialog.close())));
+  document.body.append(dialog);dialog.showModal();render();
+}
+
+async function exportHighlight(event,id){
+  const canvas=element('canvas');
+  canvas.width=720;canvas.height=1280;
+  if(!canvas.captureStream || typeof MediaRecorder==='undefined')throw new Error('Video export is unavailable in this browser. Try Edge or Chrome.');
+  const mimeType=['video/mp4','video/webm;codecs=vp8','video/webm'].find(type=>MediaRecorder.isTypeSupported(type));
+  if(!mimeType)throw new Error('This browser has no supported video format.');
+  if(!event.entries.length)throw new Error('Add a visible guest entry before exporting a highlight.');
+  notice.textContent='Preparing a highlight of up to six recent entries.';
+  const scenes=await Promise.all([
+    {title:event.name,caption:dateLabel(event.date),photo:event.cover,duration:2600},
+    ...event.entries.slice(0,6).map(entry=>({title:entry.name,caption:entry.message,photo:entry.photo,duration:Math.max(4500,entry.message.length*42)})),
+    {title:'Kerlip Photobooth',caption:'Digital Guest Book',duration:2200}
+  ].map(async scene=>({...scene,image:scene.photo?await loadImage(photoUrl('album',id,scene.photo)):null})));
+  const context=canvas.getContext('2d');
+  const stream=canvas.captureStream(24);
+  let recorder;
+  try{
+    recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:2400000});
+    const chunks=[];
+    const recording=new Promise((resolve,reject)=>{
+      recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+      recorder.onstop=()=>resolve(new Blob(chunks,{type:recorder.mimeType||mimeType}));
+      recorder.onerror=()=>reject(new Error('Video recording failed. Try another browser.'));
+    });
+    const total=scenes.reduce((sum,scene)=>sum+scene.duration,0);
+    let frame;
+    const render=new Promise((resolve,reject)=>{
+      const start=performance.now();
+      function draw(now){
+        try{
+          if(document.hidden)throw new Error('Keep the album tab open and visible while exporting.');
+          const elapsed=now-start;
+          let offset=elapsed;
+          const scene=scenes.find(scene=>{
+            if(offset<scene.duration)return true;
+            offset-=scene.duration;return false;
+          });
+          if(!scene){recorder.stop();resolve();return;}
+          context.fillStyle='#241810';context.fillRect(0,0,720,1280);
+          context.globalAlpha=Math.max(0,Math.min(1,offset/420,(scene.duration-offset)/420));
+          context.fillStyle='#e0b981';context.font='25px Georgia';
+          context.fillText('KERLIP DIGITAL GUEST BOOK',48,82);
+          if(scene.image)coverImage(context,scene.image,48,145,624,535);
+          context.fillStyle='#fff7e9';context.font='38px Georgia';
+          const y=writeLines(context,scene.title,48,scene.image?760:450,624,46);
+          const longCaption=scene.caption.length>180;
+          context.font=longCaption?'25px Georgia':'30px Georgia';
+          writeLines(context,scene.caption,48,y+18,624,longCaption?31:38);
+          context.globalAlpha=1;
+          notice.textContent='Recording highlight. '+Math.min(99,Math.floor(elapsed/total*100))+'%';
+          frame=requestAnimationFrame(draw);
+        }catch(error){reject(error);}
+      }
+      recorder.start();
+      frame=requestAnimationFrame(draw);
+    });
+    let blob;
+    try{[blob]=await Promise.all([recording,render]);}
+    finally{cancelAnimationFrame(frame);}
+    if(!blob.size)throw new Error('The browser produced an empty video. Try again.');
+    const url=URL.createObjectURL(blob),anchor=element('a');
+    const extension=blob.type.startsWith('video/mp4')?'mp4':'webm';
+    anchor.href=url;anchor.download=(event.name.replace(/[^\p{L}\p{N}]+/gu,'-')||'Kerlip')+'-Highlight.'+extension;
+    document.body.append(anchor);anchor.click();anchor.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    notice.textContent='Highlight downloaded as '+extension.toUpperCase()+'.';
+  }finally{
+    if(recorder?.state==='recording')recorder.stop();
+    for(const track of stream.getTracks())track.stop();
+  }
+}
+
 async function loadImage(url){
   const img=image(url,'');
   await img.decode();
