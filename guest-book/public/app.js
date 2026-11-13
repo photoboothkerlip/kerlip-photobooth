@@ -48,7 +48,7 @@ const dateLabel=date=>new Intl.DateTimeFormat('en-MY',{dateStyle:'long',timeZone
 const photoUrl=(role,id,photo)=>'/api/'+role+'/'+id+'/photo/'+photo;
 async function guest(id){
   const event=await api('/guest/'+id);
-  const layout=element('div','','layout'),hero=element('section','','hero');
+  const layout=element('div','','layout guest-layout'),hero=element('section','','hero');
   if(event.cover) hero.style.backgroundImage='linear-gradient(0deg,#21150bea,transparent 80%),url('+photoUrl('guest',id,event.cover)+')';
   hero.append(append(element('div'),element('p',dateLabel(event.date)),element('h1',event.name),element('p','Leave a little memory from tonight.')));
   const panel=append(element('section','','panel'),element('h2','Sign the guest book'),element('p','Choose a booth photo, upload your own, or leave a message on its own.','muted'));
@@ -57,7 +57,7 @@ async function guest(id){
   const picker=element('input'), preview=element('div'), uploadStatus=element('p','','status');
   picker.type='file';picker.accept='image/jpeg,image/png,image/webp';picker.hidden=true;
   uploadStatus.setAttribute('role','status');
-  const uploadButton=button('Upload photo',()=>picker.click());
+  const uploadButton=button('Upload photo',()=>picker.click(),'guest-upload');
   function clearUpload(){
     upload=null;preview.replaceChildren();uploadStatus.textContent='';
   }
@@ -105,7 +105,7 @@ async function guest(id){
     root.reset();clearUpload();selected=null;renderPhotos(event.photos,true);
     status.textContent='Thank you, '+data.name.trim()+'! Your entry is saved.';
   });
-  panel.append(choices,uploadButton,picker,uploadStatus,preview,signing);app.replaceChildren(append(layout,hero,panel));
+  panel.append(uploadButton,picker,uploadStatus,preview,choices,signing);app.replaceChildren(append(layout,hero,panel));
   setInterval(async()=>{
     try{event.photos=(await api('/guest/'+id)).photos;renderPhotos(event.photos);}
     catch{ /* Keep the current choices if Wi-Fi briefly drops. */ }
