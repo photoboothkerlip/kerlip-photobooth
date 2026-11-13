@@ -51,8 +51,16 @@ async function guest(id){
   const layout=element('div','','layout'),hero=element('section','','hero');
   if(event.cover) hero.style.backgroundImage='linear-gradient(0deg,#21150bea,transparent 80%),url('+photoUrl('guest',id,event.cover)+')';
   hero.append(append(element('div'),element('p',dateLabel(event.date)),element('h1',event.name),element('p','Leave a little memory from tonight.')));
-  const panel=append(element('section','','panel'),element('h2','Sign the guest book'),element('p','Choose your booth photo or leave a message on its own.','muted'));
+  const panel=append(element('section','','panel'),element('h2','Sign the guest book'),element('p','Choose a booth photo, upload your own, or leave a message on its own.','muted'));
   let selected=null, current='';
+  let upload=null, preparing=false;
+  const picker=element('input'), preview=element('div'), uploadStatus=element('p','','status');
+  picker.type='file';picker.accept='image/jpeg,image/png,image/webp';picker.hidden=true;
+  uploadStatus.setAttribute('role','status');
+  const uploadButton=button('Upload photo',()=>picker.click());
+  function clearUpload(){
+    upload=null;preview.replaceChildren();uploadStatus.textContent='';
+  }
   const choices=element('div','','choices');
   choices.setAttribute('role','group');choices.setAttribute('aria-label','Choose a booth photo');
   function renderPhotos(photos,force=false){
@@ -63,6 +71,8 @@ async function guest(id){
     choices.replaceChildren();
     for(const [index,photo] of [{id:''},...photos].entries()){
       const item=button(index?'Photo '+index:'Message only',()=>{
+        if(preparing)return;
+        clearUpload();
         selected=photo.id;
         for(const option of choices.children) option.setAttribute('aria-pressed',String(option===item));
       });
@@ -72,13 +82,30 @@ async function guest(id){
     }
   }
   renderPhotos(event.photos,true);
+  picker.onchange=async()=>{
+    const file=picker.files[0];
+    if(!file)return;
+    picker.value='';preparing=true;uploadButton.disabled=true;
+    uploadStatus.textContent='Preparing photo.';
+    try{
+      upload=await convert(file);
+      selected=null;renderPhotos(event.photos,true);
+      preview.replaceChildren(image(upload,'Your selected photo','art'),button('Remove uploaded photo',clearUpload));
+      uploadStatus.textContent='Photo ready to attach.';
+    }catch{
+      uploadStatus.textContent='Could not open this photo. Try a JPG, PNG or WebP.';
+    }finally{preparing=false;uploadButton.disabled=false;}
+  };
   const signing=form([['name','Your name','text',60],['message','Your message','textarea',300,event.prompt]],'Sign guest book',async(data,root,status)=>{
-    if(selected===null)throw new Error('Choose a photo or Message only.');
-    await api('/guest/'+id+'/sign',{...data,photo:selected});
-    root.reset();selected=null;renderPhotos(event.photos,true);
+    if(preparing)throw new Error('Wait for your photo to finish loading.');
+    if(selected===null && !upload)throw new Error('Choose a booth photo, upload a photo, or select Message only.');
+    uploadButton.disabled=true;
+    try{await api('/guest/'+id+'/sign',{...data,photo:selected,upload});}
+    finally{uploadButton.disabled=false;}
+    root.reset();clearUpload();selected=null;renderPhotos(event.photos,true);
     status.textContent='Thank you, '+data.name.trim()+'! Your entry is saved.';
   });
-  panel.append(choices,signing);app.replaceChildren(append(layout,hero,panel));
+  panel.append(choices,uploadButton,picker,uploadStatus,preview,signing);app.replaceChildren(append(layout,hero,panel));
   setInterval(async()=>{
     try{event.photos=(await api('/guest/'+id)).photos;renderPhotos(event.photos);}
     catch{ /* Keep the current choices if Wi-Fi briefly drops. */ }
@@ -164,7 +191,9 @@ async function crewEvent(id){
         try{await api('/crew/'+id+'/visibility',{entry:entry.id,hidden:!entry.hidden});await refresh();}
         catch(error){showError(error);toggle.disabled=false;}
       });
-      rows.append(append(element('div','','row'),append(element('div'),element('strong',entry.name+(entry.hidden?' � Hidden':'')),element('p',entry.message,'muted')),toggle));
+      const details=append(element('div'),element('strong',entry.name+(entry.hidden?' � Hidden':'')),element('p',entry.message,'muted'));
+      if(entry.photo) details.append(image(photoUrl('crew',id,entry.photo),'Attached photo','art'));
+      rows.append(append(element('div','','row'),details,toggle));
     }
   };
   left.append(cover,fieldLink('Guest tablet link','/guest/'+id),fieldLink('Organiser album link','/album/'+event.album),uploader(id,true,refresh),uploader(id,false,refresh));
