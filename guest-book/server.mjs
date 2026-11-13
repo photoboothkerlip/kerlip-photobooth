@@ -98,6 +98,13 @@ function eventInfo(event) {
 function entries(event,crew=false) {
   return all('SELECT id,name,message,photo,hidden FROM entries WHERE event=? '+(crew?'':'AND hidden=0')+' ORDER BY id DESC',event);
 }
+function decodePhoto(file) {
+  const match=typeof file==='string' && /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(file);
+  requireThat(match,400,'Use a valid photo.');
+  const bytes=Buffer.from(match[1],'base64');
+  requireThat(bytes.length<=900000 && bytes[0]===255 && bytes[1]===216 && bytes.at(-2)===255 && bytes.at(-1)===217,400,'Each converted JPEG must be under 900 KB.');
+  return bytes;
+}
 export async function route(req,res,path) {
   const post=req.method==='POST';
   const crew=()=>requireThat(credentials(req,'crew'),401,'Sign in as crew.');
@@ -139,19 +146,21 @@ export async function route(req,res,path) {
     const data=await body(req), name=field(data.name,60,'Name'),message=field(data.message,300,'Message');
     const photo=data.photo||null;
     requireThat(!photo || (typeof photo==='string' && get('SELECT 1 FROM photos WHERE id=? AND event=? AND booth=1',photo,event.id)),400,'Select a booth photo from this event.');
-    run('INSERT INTO entries (event,name,message,photo) VALUES (?,?,?,?)',event.id,name,message,photo);
+    requireThat(!photo || !data.upload,400,'Choose one photo per entry.');
+    const upload=data.upload==null?null:decodePhoto(data.upload);
+    const attached=upload?token():photo;
+    db.exec('BEGIN');
+    try {
+      if(upload) run('INSERT INTO photos VALUES (?,?,?,?,0)',attached,event.id,'image/jpeg',upload);
+      run('INSERT INTO entries (event,name,message,photo) VALUES (?,?,?,?)',event.id,name,message,attached);
+      db.exec('COMMIT');
+    } catch(error) { db.exec('ROLLBACK');throw error; }
     return send({ok:true},201);
   }
   if(role==='crew' && action==='photos' && post) {
     const data=await body(req);
     requireThat(Array.isArray(data.files) && data.files.length>0 && data.files.length<=12 && (!data.cover || data.files.length===1),400,'Choose up to 12 photos.');
-    const images=data.files.map(file=>{
-      const match=typeof file==='string' && /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(file);
-      requireThat(match,400,'Use a valid photo.');
-      const bytes=Buffer.from(match[1],'base64');
-      requireThat(bytes.length<=900000 && bytes[0]===255 && bytes[1]===216 && bytes.at(-2)===255 && bytes.at(-1)===217,400,'Each converted JPEG must be under 900 KB.');
-      return {id:token(),bytes};
-    });
+    const images=data.files.map(file=>({id:token(),bytes:decodePhoto(file)}));
     db.exec('BEGIN');
     try {
       for(const image of images) run('INSERT INTO photos VALUES (?,?,?,?,?)',image.id,event.id,'image/jpeg',image.bytes,data.cover?0:1);
