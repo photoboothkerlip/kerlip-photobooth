@@ -202,6 +202,7 @@ async function crewEvent(id){
   await refresh();
 }
 async function album(id){
+  document.body.classList.add('organiser-album');
   const root='/album/'+id;
   let event;
   try{event=await api(root);}
@@ -221,28 +222,40 @@ async function album(id){
     try{openSlideshow(await api(root),id,play);}
     catch(error){showError(error);}
   },'primary');
+  let exporting=false;
   const video=button('Download highlight video',async()=>{
-    video.disabled=true;notice.className='';
+    exporting=true;video.disabled=true;notice.className='';
     try{await exportHighlight(await api(root),id);}
     catch(error){showError(error);}
-    finally{video.disabled=false;}
+    finally{exporting=false;video.disabled=play.disabled;}
   });
-  const head=append(element('div','','bar'),append(element('div'),element('h1',event.name),element('p','Private organiser album � '+dateLabel(event.date),'muted')),append(element('div','','actions album-actions'),play,video,download));
-  const gallery=element('section','','cards');
+  const hero=element('section','','album-hero');
+  const memories=append(element('div','','album-section-heading'),element('h2','Guest memories'),download);
+  const gallery=element('section','','cards album-gallery');
+  function renderHero(current){
+    const photo=current.cover?image(photoUrl('album',id,current.cover),'','album-cover'):null;
+    const details=append(element('div','','album-hero-details'),element('p',dateLabel(current.date),'album-date'),element('h1',current.name),append(element('div','','actions album-actions'),play,video));
+    hero.replaceChildren(...(photo?[photo,details]:[details]));
+  }
   function renderCards(entries){
-  gallery.replaceChildren();
-  for(const entry of entries){
-    const card=element('article','','card');
-    if(entry.photo)card.append(image(photoUrl('album',id,entry.photo),'Booth photo from '+entry.name));
-    card.append(append(element('div'),element('p',entry.message),element('cite','- '+entry.name)));
-    gallery.append(card);
+    gallery.replaceChildren();
+    play.disabled=entries.length===0;
+    video.disabled=exporting || play.disabled;
+    for(const entry of entries){
+      const card=element('article','','album-memory'+(entry.photo?' has-photo':''));
+      if(entry.photo){
+        const photo=image(photoUrl('album',id,entry.photo),'Booth photo from '+entry.name);
+        photo.loading='lazy';
+        card.append(photo);
+      }
+      card.append(append(element('div','','memory-caption'),element('h3',entry.name),element('p',entry.message)));
+      gallery.append(card);
+    }
+    if(!entries.length)gallery.append(element('p','There are no visible entries yet.'));
   }
-  if(!entries.length)gallery.append(element('p','There are no visible entries yet.'));
-  }
+  renderHero(event);
   renderCards(event.entries);
-  app.replaceChildren(head);
-  if(event.cover)app.append(image(photoUrl('album',id,event.cover),'Event cover','art'));
-  app.append(gallery);
+  app.replaceChildren(hero,notice,memories,gallery);
   let signature=JSON.stringify(event.entries);
   setInterval(async()=>{
     try{
