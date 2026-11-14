@@ -246,7 +246,18 @@ async function album(id){
       if(entry.photo){
         const photo=image(photoUrl('album',id,entry.photo),'Booth photo from '+entry.name);
         photo.loading='lazy';
-        card.append(photo);
+        const view=button('',()=>{
+          const dialog=element('dialog','','album-show photo-view');
+          dialog.setAttribute('aria-label','Photo from '+entry.name);
+          const close=button('Close photo',()=>dialog.close());
+          dialog.addEventListener('close',()=>{dialog.remove();view.focus();},{once:true});
+          dialog.append(image(photo.src,photo.alt),close);
+          document.body.append(dialog);
+          dialog.showModal();
+        },'memory-photo');
+        view.setAttribute('aria-label','Enlarge photo from '+entry.name);
+        view.append(photo);
+        card.append(view);
       }
       card.append(append(element('div','','memory-caption'),element('h3',entry.name),element('p',entry.message)));
       gallery.append(card);
