@@ -400,7 +400,7 @@ async function loadImage(url){
   await img.decode();
   return img;
 }
-function writeLines(context,text,x,y,width,step){
+function writeLines(context,text,x,y,width,step,draw=true){
   const lines=[];
   let line='';
   for(const word of text.trim().split(/\s+/)){
@@ -414,46 +414,96 @@ function writeLines(context,text,x,y,width,step){
     }
   }
   lines.push(line);
-  for(const value of lines){context.fillText(value,x,y);y+=step;}
-  return y;
+  if(draw)for(const [index,value] of lines.entries())context.fillText(value,x,y+index*step);
+  return y+lines.length*step;
 }
 function coverImage(context,img,x,y,w,h){
   const ratio=Math.max(w/img.width,h/img.height),sw=w/ratio,sh=h/ratio;
   context.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,x,y,w,h);
 }
 async function downloadPdf(event,id){
-  const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=1414;
+  const canvas=document.createElement('canvas');
+  canvas.width=1754;
+  canvas.height=1240;
   const ctx=canvas.getContext('2d'),pages=[];
-  const cover=event.cover?await loadImage(photoUrl('album',id,event.cover)):null;
   const entries=event.entries.length?event.entries:[null];
-  for(let start=0;start<entries.length;start+=2){
-    ctx.fillStyle='#fffaf3';ctx.fillRect(0,0,1000,1414);
-    ctx.fillStyle='#38261c';ctx.font='24px Georgia';ctx.fillText('KERLIP DIGITAL GUEST BOOK',56,65);
-    ctx.font='45px Georgia';const titleEnd=writeLines(ctx,event.name,56,124,888,51);
-    ctx.font='22px system-ui';ctx.fillText(dateLabel(event.date),56,titleEnd-10);
-    if(cover)coverImage(ctx,cover,56,titleEnd+13,888,185);
-    let y=titleEnd+(cover?230:40);
-    for(const entry of entries.slice(start,start+2)){
-      ctx.strokeStyle='#c9ab7c';ctx.strokeRect(56,y,888,340);
-      if(entry){
-        if(entry.photo)coverImage(ctx,await loadImage(photoUrl('album',id,entry.photo)),76,y+20,310,300);
-        const x=entry.photo?410:80,width=entry.photo?505:830;
-        ctx.fillStyle='#38261c';ctx.font='20px Georgia';
-        const end=writeLines(ctx,entry.message,x,y+44,width,23);
-        ctx.font='italic 19px Georgia';writeLines(ctx,'- '+entry.name,x,end+8,width,22);
-      }else{ctx.fillStyle='#38261c';ctx.fillText('There are no visible entries yet.',80,y+60);}
-      y+=364;
+  for(const [index,entry] of entries.entries()){
+    const photo=entry?.photo?await loadImage(photoUrl('album',id,entry.photo)):null;
+    const background=ctx.createLinearGradient(0,0,1754,1240);
+    background.addColorStop(0,'#080808');
+    background.addColorStop(.53,'#231a13');
+    background.addColorStop(1,'#090909');
+    ctx.fillStyle=background;
+    ctx.fillRect(0,0,1754,1240);
+    const gold=ctx.createLinearGradient(44,0,1710,1240);
+    gold.addColorStop(0,'#896239');
+    gold.addColorStop(.42,'#ffe0a2');
+    gold.addColorStop(1,'#ba8244');
+    ctx.strokeStyle=gold;
+    ctx.lineWidth=2;
+    ctx.strokeRect(42,42,1670,1156);
+    for(const [x,y,angle] of [[42,42,0],[1712,1198,Math.PI]]){
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(angle);
+      for(let line=0;line<4;line++){
+        ctx.beginPath();
+        ctx.moveTo(0,145+line*17);
+        ctx.bezierCurveTo(120,30,210,120,370+line*22,0);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
-    const jpeg=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.89));
+    ctx.fillStyle=gold;
+    ctx.font='24px Georgia';
+    ctx.fillText('KERLIP  /  DIGITAL GUEST BOOK',96,111);
+    ctx.font='27px Georgia';
+    ctx.textAlign='right';
+    ctx.fillText(String(index+1).padStart(2,'0'),1658,1148);
+    ctx.textAlign='left';
+    if(photo){
+      const scale=Math.min(885/photo.naturalWidth,810/photo.naturalHeight);
+      const width=photo.naturalWidth*scale,height=photo.naturalHeight*scale;
+      const x=98+(885-width)/2,y=195+(810-height)/2;
+      ctx.fillStyle='#f9f1e3';
+      ctx.fillRect(x-12,y-12,width+24,height+24);
+      ctx.drawImage(photo,x,y,width,height);
+    }
+    const x=photo?1045:210,width=photo?585:1334;
+    ctx.fillStyle=gold;
+    ctx.font='italic 46px Georgia';
+    ctx.fillText(entry?'From our guest':'Guest book',x,304);
+    ctx.beginPath();
+    ctx.moveTo(x,330);
+    ctx.lineTo(x+Math.min(width,420),330);
+    ctx.stroke();
+    ctx.fillStyle='#fff5df';
+    ctx.font='51px Georgia';
+    const nameEnd=writeLines(ctx,entry?.name||'Guest memories',x,420,width,59);
+    const message=entry?.message||'There are no visible entries yet.';
+    const top=nameEnd+34;
+    let fontSize=34;
+    ctx.font=fontSize+'px Georgia';
+    while(writeLines(ctx,message,x,top,width,fontSize*1.4,false)>1020 && fontSize>18){
+      fontSize-=2;
+      ctx.font=fontSize+'px Georgia';
+    }
+    writeLines(ctx,message,x,top,width,fontSize*1.4);
+    ctx.fillStyle='#e9c894';
+    ctx.font='24px Georgia';
+    ctx.textAlign='center';
+    writeLines(ctx,event.name+' / '+dateLabel(event.date),877,1080,1100,31);
+    ctx.textAlign='left';
+    const jpeg=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.94));
     if(!jpeg)throw new Error('Could not generate PDF page.');
     pages.push(new Uint8Array(await jpeg.arrayBuffer()));
   }
-  const pdf=makePdf(pages);
+  const pdf=makePdf(pages,canvas.width,canvas.height);
   const url=URL.createObjectURL(pdf),anchor=element('a');
   anchor.href=url;anchor.download=(event.name.replace(/[^\p{L}\p{N}]+/gu,'-')||'Kerlip')+'-Guest-Book.pdf';
   document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
-function makePdf(pages){
+function makePdf(pages,width,height){
   const encoder=new TextEncoder(),chunks=[],offsets=[0];
   let size=0;
   function add(value){const bytes=typeof value==='string'?encoder.encode(value):value;chunks.push(bytes);size+=bytes.length;}
@@ -462,9 +512,9 @@ function makePdf(pages){
   object(1,'<< /Type /Catalog /Pages 2 0 R >>');
   object(2,'<< /Type /Pages /Count '+pages.length+' /Kids ['+pages.map((_,index)=>(3+index*3)+' 0 R').join(' ')+'] >>');
   pages.forEach((jpeg,index)=>{
-    const id=3+index*3,paint='q 595 0 0 842 0 0 cm /Photo Do Q\n';
-    object(id,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Photo '+(id+1)+' 0 R >> >> /Contents '+(id+2)+' 0 R >>');
-    object(id+1,'<< /Type /XObject /Subtype /Image /Width 1000 /Height 1414 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n',jpeg,'\nendstream');
+    const id=3+index*3,paint='q 842 0 0 595 0 0 cm /Photo Do Q\n';
+    object(id,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /XObject << /Photo '+(id+1)+' 0 R >> >> /Contents '+(id+2)+' 0 R >>');
+    object(id+1,'<< /Type /XObject /Subtype /Image /Width '+width+' /Height '+height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n',jpeg,'\nendstream');
     object(id+2,'<< /Length '+paint.length+' >>\nstream\n'+paint+'endstream');
   });
   const xref=size;
