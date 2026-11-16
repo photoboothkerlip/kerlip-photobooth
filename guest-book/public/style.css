@@ -130,3 +130,30 @@
 }
 .organiser-album #notice { padding-block: 12px 0; padding-inline: 0; }
 .organiser-album #notice:empty { padding: 0; }
+
+.album-memory.has-photo { align-content: start; }
+.organiser-album .memory-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #100e0d;
+  cursor: zoom-in;
+}
+.memory-photo:focus-visible { outline-offset: -4px; }
+.album-memory .memory-photo img {
+  position: static;
+  z-index: auto;
+  display: block;
+  object-fit: contain;
+}
+.album-memory.has-photo .memory-caption { padding-top: 20px; }
+.photo-view img {
+  display: block;
+  width: 100%;
+  max-height: calc(100dvh - 100px);
+  object-fit: contain;
+  margin-bottom: 10px;
+}
